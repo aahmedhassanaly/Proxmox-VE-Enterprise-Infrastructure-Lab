@@ -1,267 +1,137 @@
-# Task 2 — Storage Engineering
+# Task 2 – Storage Engineering
 
 ## Objective
 
-The goal of this task was to prepare the additional disk on the Proxmox server and use it as a Proxmox Directory Storage.
+Build and test different Proxmox storage backends and understand how virtual disks are created, attached, detached, and restored.
 
-The task also included adding a virtual disk from the new storage to an Ubuntu test VM.
+## Environment
 
----
-
-## 1. Storage Architecture
-
-The Proxmox server has two main disks:
-
-- `/dev/sda` — Proxmox operating system disk
-- `/dev/sdb` — additional disk for the storage lab
-
-The storage architecture used in this task is:
-
-    /dev/sdb
-        ↓
-    Filesystem
-        ↓
-    Directory Storage
-        ↓
-    storage01
-        ↓
-    VM Disk
-        ↓
-    Ubuntu VM
-
-This shows the difference between a physical disk and a Proxmox Storage.
+- Proxmox VE 8.4.21
+- Node: `proxmox-lab`
+- VM: `100 - ubuntu-test01`
+- Additional disk: `/dev/sdb` (~537 GB)
 
 ---
 
-## 2. Prepare the Additional Disk
+## 1. Directory Storage
 
-The additional disk was identified from:
+The additional disk `/dev/sdb` was prepared and configured as an ext4 filesystem.
 
-    Node → Disks
+A Proxmox Directory Storage named `storage01` was created and used for VM storage.
 
-The disk used for this task was:
+A 10 GB SCSI virtual disk was then created on `storage01` and attached to `ubuntu-test01`.
 
-    /dev/sdb
+The disk was detected successfully inside Ubuntu.
 
-The disk size was approximately 537 GB.
+This confirmed the complete flow:
 
-The disk was wiped before creating the new storage.
-
-The Proxmox system disk `/dev/sda` was not modified.
-
-### Why Wipe the Disk?
-
-Wiping removes existing partition and filesystem information so the disk can be prepared from a clean state.
-
-It does not mean that a new filesystem has already been created.
+`Physical Disk → Filesystem → Directory Storage → Virtual Disk → Guest OS`
 
 ---
-
-## 3. Create Proxmox Directory Storage
-
-A new Directory Storage was created from the Proxmox GUI.
-
-Path:
-
-    Node → Disks → Directory → Create Directory
-
-The additional disk was used to create the new storage.
-
-Configuration:
-
-| Setting | Value |
-|---|---|
-| Disk | `/dev/sdb` |
-| Filesystem | `ext4` |
-| Storage Name | `storage01` |
-| Storage Type | Directory |
-
-The new storage was then added to:
-
-    Datacenter → Storage
-
----
-
-## 4. Storage Content
-
-The new storage was configured for the required content types.
-
-Enabled:
-
-- Disk image
-- ISO image
-
-Unnecessary content types were not enabled.
-
-This is important because different Proxmox storage types can be used for different purposes.
-
-For this lab, the main purpose of `storage01` is VM storage.
-
----
-
-## 5. Verify the New Storage
-
-The new storage was checked from:
-
-    Datacenter → Storage
-
-The storage appeared as:
-
-    storage01
-
-The storage is based on the additional `/dev/sdb` disk.
-
-The existing `local` storage remains separate and continues to use the Proxmox system storage.
-
-The basic architecture is:
-
-    Proxmox
-    |
-    +-- local
-    |     └── Proxmox system storage
-    |
-    +-- storage01
-          └── Additional disk
-
----
-
-## 6. Add a VM Disk
-
-The existing Ubuntu test VM was used:
-
-    VM ID: 100
-    Name: ubuntu-test01
-
-A new virtual disk was added from:
-
-    VM → Hardware → Add → Hard Disk
-
-Configuration:
-
-| Setting | Value |
-|---|---|
-| Storage | `storage01` |
-| Size | 10 GB |
-| Bus | SCSI |
-| Cache | No cache |
-| Discard | On |
-| IO Thread | On |
-
-The existing operating system disk was not modified.
 <img width="1524" height="601" alt="image" src="https://github.com/user-attachments/assets/b8b2f4e6-cc06-41f0-8116-b0902747a61f" />
 
----
+## 2. LVM Storage
 
-## 7. Verify the Virtual Disk
+The additional disk was reused to test Proxmox LVM storage.
 
-After adding the disk, the Ubuntu VM detected a new 10 GB disk.
+The disk was added as an LVM storage backend and a 20 GB virtual disk was created from it.
 
-Inside Ubuntu, `lsblk` showed:
+The disk was attached to `ubuntu-test01` using the SCSI bus and was successfully detected by Ubuntu.
 
-    sdb    10G    disk
+This demonstrated the difference between file-based storage and block-based storage:
 
-The disk did not have a filesystem because it was added as a new virtual disk.
+`Directory Storage → VM disk stored as a file`
 
-This demonstrates the difference between:
-
-- Proxmox Storage
-- Virtual Disk
-- Guest Operating System Filesystem
-
-The final flow is:
-
-    /dev/sdb on Proxmox
-          ↓
-    storage01
-          ↓
-    10 GB Virtual Disk
-          ↓
-    Ubuntu VM
-          ↓
-    /dev/sdb
+`LVM Storage → VM disk provided as a Logical Volume`
 
 ---
+<img width="1527" height="598" alt="image" src="https://github.com/user-attachments/assets/354b279c-a11b-4c6b-8148-08702a67cbea" />
 
-## 8. Storage Troubleshooting
+## 3. ZFS Storage
 
-A simple troubleshooting scenario was reviewed for an unavailable Proxmox Storage.
+The additional disk was then reused for ZFS testing.
 
-The troubleshooting approach is:
+A ZFS storage named `zfs01` was created with:
 
-    Problem
-       ↓
-    Check the physical disk
-       ↓
-    Check the filesystem
-       ↓
-    Check the mount
-       ↓
-    Check Proxmox Storage
-       ↓
-    Verify the VM disk
+- RAID Level: Single Disk
+- Compression: Enabled
+- ashift: 12
 
-Useful checks include:
+A virtual disk was created from the ZFS storage and attached to the Ubuntu VM.
 
-    pvesm status
+Inside Ubuntu, the disk was formatted with ext4 and mounted at:
 
-and, when required:
+`/data`
 
-    findmnt
-
-The important point is to identify where the storage chain is broken instead of running random commands.
+A test file was created on the mounted filesystem.
+<img width="1906" height="650" alt="image" src="https://github.com/user-attachments/assets/434fb728-2fec-4ac2-9354-1b0bb4bae9ed" />
 
 ---
 
-## 9. Skills Practiced
+## 4. Disk Detach and Re-attach Test
 
-- Proxmox Storage concepts
-- Disk identification
-- Disk preparation
+The ZFS-backed disk was detached from the VM without deleting the virtual disk.
+
+The disk was then attached again to the same VM.
+
+The filesystem was mounted again and the previously created test file was still available.
+
+This confirmed that:
+
+**Detach removes the disk from the VM hardware configuration, but does not delete the underlying disk or its data.**
+
+---
+
+## 5. Snapshot and Rollback Test
+
+A test file was created on the ZFS-backed disk with the content:
+
+`BEFORE SNAPSHOT`
+
+A VM snapshot was created.
+
+The file was then modified to:
+
+`DATA AFTER SNAPSHOT`
+
+The VM was rolled back to the previous snapshot.
+
+After the rollback, the file content returned to:
+
+`BEFORE SNAPSHOT`
+
+The snapshot successfully included the VM disks stored on both local storage and `zfs01`.
+
+---
+<img width="1919" height="851" alt="image" src="https://github.com/user-attachments/assets/cbde1841-8fb3-4866-98d4-d59ea64d2798" />
+
+## 6. Storage Troubleshooting
+
+During the storage work, the additional disk had to be reused between different storage backends.
+
+Proxmox reported that the disk or partition was still mounted when attempting to change its storage configuration.
+
+The previous storage configuration was removed and the disk was cleaned before reusing it with another backend.
+
+A snapshot attempt while the VM was running also failed with a QEMU/vdagent migration-related error.
+
+The snapshot was retried with the VM powered off and completed successfully.
+
+---
+
+## Key Results
+
+The lab covered practical use of:
+
 - Directory Storage
-- ext4 filesystem
-- Proxmox Storage configuration
-- VM disk management
+- LVM Storage
+- ZFS Storage
+- Virtual disk creation
 - SCSI virtual disks
-- Storage verification
-- Basic storage troubleshooting
-- Understanding the relationship between physical disks, Proxmox storage, and VM disks
+- Disk detach and re-attach
+- Filesystem mounting inside a VM
+- VM snapshots
+- Snapshot rollback
+- Storage troubleshooting
 
----
-
-## 10. Assessment
-
-| Skill | Level |
-|---|---:|
-| Proxmox Storage concepts | 3 — Can implement |
-| Disk identification | 3 — Can implement |
-| Directory Storage | 3 — Can implement |
-| VM Disk management | 3 — Can implement |
-| Storage troubleshooting | 2 — Understand concepts |
-| Storage architecture | 3 — Can implement |
-
-### Overall Level
-
-**3 — Can Implement**
-
-The storage configuration was successfully implemented and tested with a real Ubuntu VM.
-
-More advanced storage troubleshooting and storage technologies will be covered in later tasks.
-
----
-
-## 11. Task Result
-
-
-**Task 2 — Completed**
-
-Completed:
-
-- Identified `/dev/sdb`
-- Prepared the additional disk
-- Created a Directory Storage
-- Created `storage01`
-- Configured storage content
-- Added a 10 GB virtual disk to `ubuntu-test01`
-- Verified the disk inside Ubuntu
-- Reviewed the basic storage troubleshooting process
 
