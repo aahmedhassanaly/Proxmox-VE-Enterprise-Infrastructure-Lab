@@ -28,6 +28,12 @@ The main goals are to:
 
 The main lab is built as a nested virtualization environment in Google Cloud.
 
+### Lab Topology
+
+The following diagram shows the main lab topology used across the project. It includes the Google Cloud network, the two-node Proxmox cluster, internal Proxmox bridges, Proxmox Backup Server, and the Veeam Proxmox Worker.
+
+![Proxmox Lab Topology](./Documentation/proxmox-lab-topology.svg)
+
 ### Proxmox Nodes
 
 | Node | Role |
