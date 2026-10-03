@@ -31,8 +31,8 @@ The main lab is built as a nested virtualization environment in Google Cloud.
 ### Lab Topology
 
 The following diagram shows the main lab topology used across the project. It includes the Google Cloud network, the two-node Proxmox cluster, internal Proxmox bridges, Proxmox Backup Server, and the Veeam Proxmox Worker.
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/c671e9ae-c4a7-45c6-8eac-333b6c74ca0d" />
 
-![Proxmox Lab Topology](./Documentation/proxmox-lab-topology.svg)
 
 ### Proxmox Nodes
 
