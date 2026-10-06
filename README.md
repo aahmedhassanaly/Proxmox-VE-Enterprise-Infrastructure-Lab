@@ -28,30 +28,30 @@ The lab uses the Google Cloud network for management and isolated Proxmox bridge
 - Proxmox Backup Server
 - Veeam Backup Repository
 
-## Task Roadmap
+## Tasks
 
-| Task | Area | Result |
-|---|---|---|
-| 01 | Proxmox foundation | ✅ |
-| 02 | Storage engineering | ✅ |
-| 03 | VM / template / clone / snapshot management | ✅ |
-| 04 | Linux bridge networking | ✅ |
-| 05 | VLAN networking | ✅ |
-| 06 | Proxmox backup & restore | ✅ |
-| 07 | VM migration | ✅ |
-| 08 | High Availability | ✅ |
-| 09 | Cluster management | ✅ |
-| 10 | VM replication | ✅ |
-| 11 | Users & permissions | ✅ |
-| 12 | Monitoring & performance | ✅ |
-| 13 | Updates & maintenance | ✅ |
-| 14 | Advanced VM administration | ✅ |
-| 15 | Ceph storage | ✅ |
-| 16 | Proxmox Backup Server | ✅ |
-| 17 | LXC administration | ✅ |
-| 18 | Veeam Backup & Replication | ✅ |
+| # | Task | Status |
+|---:|---|:---:|
+| 01 | [Proxmox Foundation Assessment](Documentation/01-proxmox-foundation-assessment.md) | ✅ |
+| 02 | [Storage Engineering](Documentation/02-storage-engineering.md) | ✅ |
+| 03 | [VM, Template, Clone & Snapshot Management](Documentation/03-VM-Template-Clone-Snapshot.md) | ✅ |
+| 04 | [Linux Bridge Networking](Documentation/Task-04-Networking-Linux-Bridge.md) | ✅ |
+| 05 | [VLAN Network Configuration](Documentation/Task-05-VLAN-Network-Configuration.md) | ✅ |
+| 06 | [Proxmox Backup & Restore](Documentation/Task-06-Proxmox-Backup-Restore.md) | ✅ |
+| 07 | [VM Migration](Documentation/Task-07-VM-Migration.md) | ✅ |
+| 08 | [High Availability](Documentation/Task-08-Proxmox-HA.md) | ✅ |
+| 09 | [Cluster Management](Documentation/Task-09-Cluster-Management.md) | ✅ |
+| 10 | [VM Replication](Documentation/Task-10-Proxmox-Replication.md) | ✅ |
+| 11 | [User & Permission Management](Documentation/Task-11-User-Permission-Management.md) | ✅ |
+| 12 | [Monitoring & Performance](Documentation/Task-12-Monitoring-Performance.md) | ✅ |
+| 13 | [Updates & Maintenance](Documentation/Task-13-Proxmox-Updates-Maintenance.md) | ✅ |
+| 14 | [Advanced VM Administration](Documentation/Task-14-Advanced-VM-Administration.md) | ✅ |
+| 15 | [Ceph Storage](Documentation/Task-15-Proxmox-Ceph-Storage.md) | ✅ |
+| 16 | [Proxmox Backup Server](Documentation/Task-16-Proxmox-Backup-Server.md) | ✅ |
+| 17 | [LXC Container Administration](Documentation/Task-17-LXC-Container-Administration.md) | ✅ |
+| 18 | [Veeam Backup & Replication](Documentation/Task-18-Veeam-Backup-Replication.md) | ✅ |
 
-Detailed implementation notes are available in [Documentation](Documentation/).
+Detailed implementation notes: [Documentation](Documentation/).
 
 ## Core Skills Demonstrated
 
